@@ -9,13 +9,12 @@ import com.example.passwordmanager.passwords.PasswordsFragment
 
 
 class ViewPagerAdapter(fragmentActivity: FragmentActivity) : FragmentStateAdapter(fragmentActivity) {
-    override fun getItemCount(): Int = 3
+    override fun getItemCount(): Int = 2
 
     override fun createFragment(position: Int): Fragment {
         return when (position) {
             0 -> PasswordsFragment()
             1 -> CardsFragment()
-            2 -> DocumentsFragment()
             else -> throw IllegalArgumentException("Invalid position $position")
         }
     }

@@ -14,10 +14,13 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AnimationUtils
 import android.widget.*
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.passwordmanager.cards.AddCardDialogFragment
+import com.example.passwordmanager.cards.CardAdapter
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class PasswordsFragment : Fragment(), AddPasswordDialogFragment.AddPasswordListener {
@@ -28,6 +31,9 @@ class PasswordsFragment : Fragment(), AddPasswordDialogFragment.AddPasswordListe
     private lateinit var secureStorage: DataManager
     private var isSelectionMode = false
     private lateinit var deleteButton: Button
+    private lateinit var searchBar: com.google.android.material.search.SearchBar
+    private lateinit var searchView: com.google.android.material.search.SearchView
+    private lateinit var searchAdapter: PasswordAdapter
 
     @SuppressLint("NotifyDataSetChanged")
     private fun loadPasswords() {
@@ -35,7 +41,6 @@ class PasswordsFragment : Fragment(), AddPasswordDialogFragment.AddPasswordListe
         if (savedPasswords != null) {
             passwords.clear()
             passwords.addAll(savedPasswords)
-            filteredPasswords.addAll(savedPasswords)
             adapter.notifyDataSetChanged()
         }
     }
@@ -54,27 +59,25 @@ class PasswordsFragment : Fragment(), AddPasswordDialogFragment.AddPasswordListe
 
         recyclerView = view.findViewById(R.id.passwordsRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(context)
-        adapter = PasswordAdapter(filteredPasswords, { password -> showPasswordInfoDialog(password) }, { password -> onPasswordLongClick(password) })
+        adapter = PasswordAdapter(passwords, { password -> showPasswordInfoDialog(password) }, { password -> onPasswordLongClick(password) })
         recyclerView.adapter = adapter
-        loadPasswords()
 
-        val searchEditText: EditText = view.findViewById(R.id.searchEditText)
-        val searchCriteriaSpinner: Spinner = view.findViewById(R.id.searchCriteriaSpinner)
-        val addButton: Button = view.findViewById(R.id.addPasswordButton)
+        searchBar = view.findViewById(R.id.searchBar)
+        searchView = view.findViewById(R.id.searchView)
         deleteButton = view.findViewById(R.id.deleteButton)
         deleteButton.visibility = View.GONE
 
-        searchEditText.addTextChangedListener(object : TextWatcher {
-            override fun afterTextChanged(s: Editable?) {
-                filterPasswords(s.toString(), searchCriteriaSpinner.selectedItem.toString())
+        setupSearch()
+        loadPasswords()
+
+        searchBar.setOnMenuItemClickListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.action_add -> {
+                    AddPasswordDialogFragment.show(childFragmentManager, this)
+                    true
+                }
+                else -> false
             }
-
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-        })
-
-        addButton.setOnClickListener {
-            AddPasswordDialogFragment.show(childFragmentManager, this)
         }
 
         deleteButton.setOnClickListener {
@@ -82,24 +85,44 @@ class PasswordsFragment : Fragment(), AddPasswordDialogFragment.AddPasswordListe
         }
     }
 
-    @SuppressLint("NotifyDataSetChanged")
-    private fun filterPasswords(query: String, criteria: String) {
-        filteredPasswords.clear()
-        for (password in passwords) {
-            if ((criteria == "Site Name" && password.siteName.contains(query, true)) ||
-                (criteria == "Login" && password.login.contains(query, true)) ||
-                (criteria == "Email" && password.email.contains(query, true)) ||
-                (criteria == "Password" && password.password.contains(query, true))) {
-                filteredPasswords.add(password)
-            }
+    private fun setupSearch() {
+        searchBar.setOnClickListener {
+            searchView.show()
         }
-        adapter.notifyDataSetChanged()
+
+        // Создаем отдельный RecyclerView для результатов поиска
+        val searchRecyclerView = RecyclerView(requireContext()).apply {
+            layoutManager = LinearLayoutManager(context)
+            layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+        }
+        searchAdapter = PasswordAdapter(mutableListOf(), { password -> showPasswordInfoDialog(password) }, { password -> onPasswordLongClick(password) })
+        searchRecyclerView.adapter = searchAdapter
+
+        // Добавляем RecyclerView в SearchView
+        searchView.addView(searchRecyclerView)
+
+        searchView.editText.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                filterPasswords(s.toString())
+            }
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+        })
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    private fun filterPasswords(query: String) {
+        val filteredPasswords = passwords.filter { password ->
+            password.siteName.contains(query, true) || password.login.contains(query, true) || password.email.contains(query, true)
+        }
+        searchAdapter.updatePasswords(filteredPasswords)
+        searchAdapter.notifyDataSetChanged()
     }
 
     override fun onPasswordAdded(password: Password) {
         passwords.add(password)
-        filteredPasswords.add(password)
-        adapter.notifyItemInserted(filteredPasswords.size - 1)
+        adapter.notifyItemInserted(passwords.size - 1)
         savePasswords()
     }
 
@@ -119,7 +142,17 @@ class PasswordsFragment : Fragment(), AddPasswordDialogFragment.AddPasswordListe
     }
 
     private fun updateDeleteButtonVisibility() {
+        val prevVisibility = deleteButton.visibility
         deleteButton.visibility = if (adapter.getSelectedPasswords().isNotEmpty()) View.VISIBLE else View.GONE
+        val scaleUp = AnimationUtils.loadAnimation(context, R.anim.scale_up)
+        val scaleDown = AnimationUtils.loadAnimation(context, R.anim.scale_down)
+        if(prevVisibility != deleteButton.visibility) {
+            if (deleteButton.visibility == View.VISIBLE) {
+                deleteButton.startAnimation(scaleUp)
+            } else{
+                deleteButton.startAnimation(scaleDown)
+            }
+        }
     }
 
     private fun showPasswordInfoDialog(password: Password) {
@@ -166,7 +199,6 @@ class PasswordsFragment : Fragment(), AddPasswordDialogFragment.AddPasswordListe
         }
 
         editButton.setOnClickListener {
-            // Open AddPasswordDialogFragment with existing password data for editing
             val dialogFragment = AddPasswordDialogFragment().apply {
                 setListener(object : AddPasswordDialogFragment.AddPasswordListener {
                     override fun onPasswordAdded(updatedPassword: Password) {
@@ -174,10 +206,9 @@ class PasswordsFragment : Fragment(), AddPasswordDialogFragment.AddPasswordListe
                         val index = passwords.indexOfFirst { it.siteName == password.siteName && it.login == password.login }
                         if (index != -1) {
                             passwords[index] = updatedPassword
-                            filterPasswords("", "") // Refresh the filtered list
+                            adapter.notifyItemChanged(index)
+                            filterPasswords("") // Refresh the filtered list
                         }
-                        filteredPasswords.add(updatedPassword)
-                        adapter.notifyItemInserted(filteredPasswords.size - 1)
                         loginTextView.text = updatedPassword.login
                         emailTextView.text = updatedPassword.email
                         passwordTextView.text = updatedPassword.password
@@ -204,6 +235,15 @@ class PasswordsFragment : Fragment(), AddPasswordDialogFragment.AddPasswordListe
         }
 
         dialog.show()
+    }
+
+    fun onBackPressed(): Boolean {
+        if (adapter.getSelectedPasswords().isNotEmpty()) {
+            adapter.exitSelectionMode()
+            updateDeleteButtonVisibility()
+            return true
+        }
+        return false
     }
 }
 

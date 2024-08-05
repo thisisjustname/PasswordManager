@@ -1,3 +1,35 @@
 <resources>
     <string name="app_name">PasswordManager</string>
+    <string name="add_new_card">Add new card</string>
+    <string name="card_name">Card name</string>
+    <string name="card_number">Card number</string>
+    <string name="cvv" translatable="false">CVV</string>
+    <string name="pin">Pin code</string>
+    <string name="add_text">Add</string>
+    <string name="cancel_text">Cancel</string>
+    <string name="password_text">Passwords</string>
+    <string name="cards_text">Cards</string>
+    <string name="documents_text">Documents</string>
+    <string name="add_new_password">Add new password</string>
+    <string name="site_name">Site name</string>
+    <string name="login">Login</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="delete_text">Delete</string>
+    <string name="search">Search</string>
+    <string name="ok" translatable="false">OK</string>
+    <string name="authentication">Authentication</string>
+    <string name="enter_pin">Enter PIN</string>
+    <string name="submit">Submit</string>
+    <string name="use_biometrics">Use Biometrics</string>
+    <string name="set_up_pin">Set up PIN</string>
+    <string name="enter_digit_pin">Enter 6-digit PIN</string>
+    <string name="сonfirm_pin">Confirm PIN</string>
+    <string name="input_at_least">Input at least one character</string>
+    <string name="card_numbers">Card number must be 16 digits</string>
+    <string name="cvv_length">CVV must be 3 digits</string>
+    <string name="pin_length">Pin must be 4 digits</string>
+    <string name="app_pin_length">PIN must be 6 digits</string>
+    <string name="pins_not_match">PINs do not match</string>
+    <string name="incorrect_pin">Incorrect PIN</string>
 </resources>

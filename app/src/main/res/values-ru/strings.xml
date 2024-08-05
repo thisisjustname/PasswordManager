@@ -1,0 +1,33 @@
+<resources>
+    <string name="app_name">PasswordManager</string>
+    <string name="add_new_card">Добавить новую карту</string>
+    <string name="card_name">Имя карты</string>
+    <string name="card_number">Номер карты</string>
+    <string name="pin">Пинкод</string>
+    <string name="add_text">Подтвердить</string>
+    <string name="cancel_text">Отмена</string>
+    <string name="password_text">Пароли</string>
+    <string name="cards_text">Карты</string>
+    <string name="documents_text">Документы</string>
+    <string name="add_new_password">Добавить новый пароль</string>
+    <string name="site_name">Название сайта</string>
+    <string name="login">Логин</string>
+    <string name="email">Почта</string>
+    <string name="password">Пароль</string>
+    <string name="delete_text">Удалить</string>
+    <string name="search">Поиск</string>
+    <string name="authentication">Авторизоваться</string>
+    <string name="enter_pin">Введите пинкод</string>
+    <string name="submit">Подтвердить</string>
+    <string name="use_biometrics">Использовать биометрию</string>
+    <string name="set_up_pin">Задайте пинкод</string>
+    <string name="enter_digit_pin">Введите 6-значный пинкод</string>
+    <string name="сonfirm_pin">Подтвердите пинкод</string>
+    <string name="input_at_least">Введите хотя бы один символ</string>
+    <string name="card_numbers">Введите 16 символов</string>
+    <string name="cvv_length">CVV должен содержать 3 цифры</string>
+    <string name="pin_length">Пинкод должен содержать 4 символа</string>
+    <string name="app_pin_length">Пинкод должен содержать 6 символов</string>
+    <string name="pins_not_match">Пинкоды не совпадают</string>
+    <string name="incorrect_pin">Не верный пароль</string>
+</resources>

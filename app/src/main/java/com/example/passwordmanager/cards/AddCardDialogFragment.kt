@@ -3,19 +3,15 @@ package com.example.passwordmanager.cards
 import android.app.Dialog
 import android.os.Bundle
 import android.text.Editable
-import android.text.InputType
 import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
-import android.widget.ImageButton
 import android.widget.TextView
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentManager
 import com.example.passwordmanager.R
-import com.example.passwordmanager.passwords.AddPasswordDialogFragment
-import com.example.passwordmanager.passwords.Password
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class AddCardDialogFragment : DialogFragment() {
@@ -85,22 +81,22 @@ class AddCardDialogFragment : DialogFragment() {
             val pin = cardPinInput.text.toString()
 
             if (cardName.isEmpty()) {
-                cardNameInput.error = "Input at least one character"
+                cardNameInput.error = getString(R.string.input_at_least)
                 return@setOnClickListener
             }
 
             if (number.length != 19) {
-                cardNumberInput.error = "Card number must be 16 digits"
+                cardNumberInput.error = getString(R.string.card_numbers)
                 return@setOnClickListener
             }
 
             if (cvv.length != 3) {
-                cardCVVInput.error = "CVV must be 3 digits"
+                cardCVVInput.error = getString(R.string.cvv_length)
                 return@setOnClickListener
             }
 
             if (pin.length != 4) {
-                cardPinInput.error = "CVV must be 4 digits"
+                cardPinInput.error = getString(R.string.pin_length)
                 return@setOnClickListener
             }
 

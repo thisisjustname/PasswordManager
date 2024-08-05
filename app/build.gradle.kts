@@ -17,6 +17,8 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -52,4 +54,6 @@ dependencies {
     implementation("androidx.viewpager2:viewpager2:1.0.0")
     implementation ("androidx.cardview:cardview:1")
     implementation("com.google.code.gson:gson:2.8.9")
+    implementation ("androidx.core:core-ktx:1.10.0")
+
 }

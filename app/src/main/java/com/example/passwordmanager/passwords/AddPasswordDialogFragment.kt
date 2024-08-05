@@ -55,22 +55,22 @@ class AddPasswordDialogFragment : DialogFragment() {
             val password = passwordInput.text.toString()
 
             if (siteName.isEmpty()) {
-                siteNameInput.error = "Input at least 1 character."
+                siteNameInput.error = getString(R.string.input_at_least)
                 return@setOnClickListener
             }
 
             if (login.isEmpty()) {
-                loginInput.error = "Input at least 1 character."
+                loginInput.error = getString(R.string.input_at_least)
                 return@setOnClickListener
             }
 
             if (email.isEmpty()) {
-                emailInput.error = "Input at least 1 character."
+                emailInput.error = getString(R.string.input_at_least)
                 return@setOnClickListener
             }
 
             if (password.isEmpty()) {
-                passwordInput.error = "Input at least 1 character."
+                passwordInput.error = getString(R.string.input_at_least)
                 return@setOnClickListener
             }
 

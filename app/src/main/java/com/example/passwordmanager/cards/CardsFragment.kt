@@ -11,6 +11,7 @@ import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AnimationUtils
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Spinner
@@ -34,14 +35,16 @@ class CardsFragment : Fragment(), AddCardDialogFragment.AddCardListener {
     private lateinit var secureStorage: DataManager
     private var isSelectionMode = false
     private lateinit var deleteButton: Button
+    private lateinit var searchBar: com.google.android.material.search.SearchBar
+    private lateinit var searchView: com.google.android.material.search.SearchView
+    private lateinit var searchAdapter: CardAdapter
 
     @SuppressLint("NotifyDataSetChanged")
     private fun loadCards() {
-        val savedPasswords = secureStorage.getDecrypted("cards", Array<Card>::class.java)
-        if (savedPasswords != null) {
+        val savedCards = secureStorage.getDecrypted("cards", Array<Card>::class.java)
+        if (savedCards != null) {
             cards.clear()
-            cards.addAll(savedPasswords)
-            filteredCards.addAll(savedPasswords)
+            cards.addAll(savedCards)
             adapter.notifyDataSetChanged()
         }
     }
@@ -60,26 +63,25 @@ class CardsFragment : Fragment(), AddCardDialogFragment.AddCardListener {
 
         recyclerView = view.findViewById(R.id.cardsRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(context)
-        adapter = CardAdapter(filteredCards, { card -> showCardInfoDialog(card) }, { card -> onCardLongClick(card) })
+        adapter = CardAdapter(cards, { card -> showCardInfoDialog(card) }, { card -> onCardLongClick(card) })
         recyclerView.adapter = adapter
-        loadCards()
 
-        val searchEditText: EditText = view.findViewById(R.id.searchEditText)
-        val addButton: Button = view.findViewById(R.id.addCardButton)
+        searchBar = view.findViewById(R.id.searchBar)
+        searchView = view.findViewById(R.id.searchView)
         deleteButton = view.findViewById(R.id.deleteButton)
         deleteButton.visibility = View.GONE
 
-        searchEditText.addTextChangedListener(object : TextWatcher {
-            override fun afterTextChanged(s: Editable?) {
-                filterCards(s.toString())
+        setupSearch()
+        loadCards()
+
+        searchBar.setOnMenuItemClickListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.action_add -> {
+                    AddCardDialogFragment.show(childFragmentManager, this)
+                    true
+                }
+                else -> false
             }
-
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-        })
-
-        addButton.setOnClickListener {
-            AddCardDialogFragment.show(childFragmentManager, this)
         }
 
         deleteButton.setOnClickListener {
@@ -87,22 +89,44 @@ class CardsFragment : Fragment(), AddCardDialogFragment.AddCardListener {
         }
     }
 
+    private fun setupSearch() {
+        searchBar.setOnClickListener {
+            searchView.show()
+        }
+
+        // Создаем отдельный RecyclerView для результатов поиска
+        val searchRecyclerView = RecyclerView(requireContext()).apply {
+            layoutManager = LinearLayoutManager(context)
+            layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+        }
+        searchAdapter = CardAdapter(mutableListOf(), { card -> showCardInfoDialog(card) }, { card -> onCardLongClick(card) })
+        searchRecyclerView.adapter = searchAdapter
+
+        // Добавляем RecyclerView в SearchView
+        searchView.addView(searchRecyclerView)
+
+        searchView.editText.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                filterCards(s.toString())
+            }
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+        })
+    }
+
     @SuppressLint("NotifyDataSetChanged")
     private fun filterCards(query: String) {
-        filteredCards.clear()
-        for (card in cards) {
-            if ((card.cardName.contains(query, true)) ||
-                (card.cardNumber.contains(query, true))) {
-                filteredCards.add(card)
-            }
+        val filteredCards = cards.filter { card ->
+            card.cardName.contains(query, true) || card.cardNumber.contains(query, true)
         }
-        adapter.notifyDataSetChanged()
+        searchAdapter.updateCards(filteredCards)
+        searchAdapter.notifyDataSetChanged()
     }
 
     override fun onCardAdded(card: Card) {
         cards.add(card)
-        filteredCards.add(card)
-        adapter.notifyItemInserted(filteredCards.size - 1)
+        adapter.notifyItemInserted(cards.size - 1)
         saveCards()
     }
 
@@ -122,7 +146,17 @@ class CardsFragment : Fragment(), AddCardDialogFragment.AddCardListener {
     }
 
     private fun updateDeleteButtonVisibility() {
+        val prevVisibility = deleteButton.visibility
         deleteButton.visibility = if (adapter.getSelectedCards().isNotEmpty()) View.VISIBLE else View.GONE
+        val scaleUp = AnimationUtils.loadAnimation(context, R.anim.scale_up)
+        val scaleDown = AnimationUtils.loadAnimation(context, R.anim.scale_down)
+        if(prevVisibility != deleteButton.visibility) {
+            if (deleteButton.visibility == View.VISIBLE) {
+                deleteButton.startAnimation(scaleUp)
+            } else{
+                deleteButton.startAnimation(scaleDown)
+            }
+        }
     }
 
     private fun showCardInfoDialog(card: Card) {
@@ -171,7 +205,6 @@ class CardsFragment : Fragment(), AddCardDialogFragment.AddCardListener {
         }
 
         editButton.setOnClickListener {
-            // Open AddPasswordDialogFragment with existing password data for editing
             val dialogFragment = AddCardDialogFragment().apply {
                 setListener(object : AddCardDialogFragment.AddCardListener {
                     override fun onCardAdded(updatedCard: Card) {
@@ -179,10 +212,9 @@ class CardsFragment : Fragment(), AddCardDialogFragment.AddCardListener {
                         val index = cards.indexOfFirst { it.cardNumber == card.cardNumber && it.cardName == card.cardName }
                         if (index != -1) {
                             cards[index] = updatedCard
+                            adapter.notifyItemChanged(index)
                             filterCards("") // Refresh the filtered list
                         }
-                        filteredCards.add(updatedCard)
-                        adapter.notifyItemInserted(filteredCards.size - 1)
                         cardName.text = updatedCard.cardName
                         cardNumber.text = updatedCard.cardNumber
                         cardCvv.text = updatedCard.cvv
@@ -209,6 +241,15 @@ class CardsFragment : Fragment(), AddCardDialogFragment.AddCardListener {
         }
 
         dialog.show()
+    }
+
+    fun onBackPressed(): Boolean {
+        if (adapter.getSelectedCards().isNotEmpty()) {
+            adapter.exitSelectionMode()
+            updateDeleteButtonVisibility()
+            return true
+        }
+        return false
     }
 }
 

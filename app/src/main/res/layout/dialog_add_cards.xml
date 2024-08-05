@@ -19,7 +19,7 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:paddingBottom="16dp"
-            android:text="Add New Card"
+            android:text="@string/add_new_card"
             android:textSize="20sp"
             android:textStyle="bold" />
 
@@ -27,7 +27,7 @@
             android:id="@+id/textField"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Name">
+            android:hint="@string/card_name">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/cardNameInput"
@@ -41,7 +41,7 @@
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Number">
+            android:hint="@string/card_number">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/cardNumberInput"
@@ -56,7 +56,7 @@
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="CVV"
+            android:hint="@string/cvv"
             app:endIconMode="password_toggle">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -72,7 +72,7 @@
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Pin"
+            android:hint="@string/pin"
             app:endIconMode="password_toggle">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -80,7 +80,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="number|numberPassword"
-                android:maxLength="4" />
+                android:maxLength="4"/>
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -96,13 +96,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginRight="15dp"
-                android:text="Cancel" />
+                android:text="@string/cancel_text" />
 
             <Button
                 android:id="@+id/addButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Add" />
+                android:text="@string/add_text"
+                android:textColor="?attr/colorOnPrimary" /> />
         </LinearLayout>
     </LinearLayout>
 </androidx.cardview.widget.CardView>

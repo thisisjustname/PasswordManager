@@ -18,35 +18,54 @@ class PasswordAdapter(
     private val selectedPasswords = mutableSetOf<Password>()
     private var isSelectionMode = false
 
-    class PasswordViewHolder(itemView: View, private val onItemClick: (Password) -> Unit, private val onItemLongClick: (Password) -> Unit) : RecyclerView.ViewHolder(itemView) {
+    class PasswordViewHolder(
+        itemView: View,
+        private val onItemClick: (Password) -> Unit,
+        private val onItemLongClick: (Password) -> Unit
+    ) : RecyclerView.ViewHolder(itemView) {
         private val siteNameTextView: TextView = itemView.findViewById(R.id.siteNameTextView)
         private val loginTextView: TextView = itemView.findViewById(R.id.loginTextView)
         private val emailTextView: TextView = itemView.findViewById(R.id.emailTextView)
-        private val checkBox: CheckBox = itemView.findViewById(R.id.selectionCheckBox)
+        private val cardView: com.google.android.material.card.MaterialCardView =
+            itemView.findViewById(R.id.cardView)
         private lateinit var password: Password
+        private var isInSelectionMode = false
 
         init {
             itemView.setOnClickListener {
-                onItemClick(password)
+                if (isInSelectionMode) {
+                    toggleSelection()
+                } else {
+                    onItemClick(password)
+                }
             }
             itemView.setOnLongClickListener {
-                onItemLongClick(password)
+                toggleSelection()
                 true
             }
         }
 
-        fun bind(password: Password, isSelected: Boolean, isSelectionMode: Boolean) {
+        private fun toggleSelection() {
+            cardView.isChecked = !cardView.isChecked
+            onItemLongClick(password)
+        }
+
+        fun bind(password: Password, isSelected: Boolean, isInSelectionMode: Boolean) {
             this.password = password
+
+            this.isInSelectionMode = isInSelectionMode
+
             siteNameTextView.text = password.siteName
             loginTextView.text = password.login
             emailTextView.text = password.email
-            checkBox.visibility = if (isSelectionMode) View.VISIBLE else View.GONE
-            checkBox.isChecked = isSelected
+
+            cardView.isChecked = isSelected
         }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PasswordViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.password_item, parent, false)
+        val view =
+            LayoutInflater.from(parent.context).inflate(R.layout.password_item, parent, false)
         return PasswordViewHolder(view, onItemClick, onItemLongClick)
     }
 
@@ -87,6 +106,12 @@ class PasswordAdapter(
 
     fun setSelectionMode(enabled: Boolean) {
         isSelectionMode = enabled
+        notifyDataSetChanged()
+    }
+
+    fun exitSelectionMode() {
+        isSelectionMode = false
+        selectedPasswords.clear()
         notifyDataSetChanged()
     }
 }

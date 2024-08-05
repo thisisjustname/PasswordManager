@@ -1,6 +1,7 @@
 package com.example.passwordmanager.cards
 
 import android.annotation.SuppressLint
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,37 +11,56 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.passwordmanager.R
 import com.example.passwordmanager.passwords.Password
 
+// Обновление адаптера для обработки долгого нажатия и управления режимом выбора
 class CardAdapter(
-    private var cards: List<Card>, private val onItemClick: (Card) -> Unit,
+    private var cards: List<Card>,
+    private val onItemClick: (Card) -> Unit,
     private val onItemLongClick: (Card) -> Unit
-) :
-    RecyclerView.Adapter<CardAdapter.CardViewHolder>() {
+) : RecyclerView.Adapter<CardAdapter.CardViewHolder>() {
 
     private val selectedCards = mutableSetOf<Card>()
     private var isSelectionMode = false
 
-    class CardViewHolder(view: View, private val onItemClick: (Card) -> Unit, private val onItemLongClick: (Card) -> Unit) : RecyclerView.ViewHolder(view) {
-        val cardNameTextView: TextView = view.findViewById(R.id.cardNameTextView)
-        val cardNumberTextView: TextView = view.findViewById(R.id.cardNumberTextView)
-        private val checkBox: CheckBox = itemView.findViewById(R.id.selectionCheckBox)
+    class CardViewHolder(
+        view: View,
+        private val onItemClick: (Card) -> Unit,
+        private val onItemLongClick: (Card) -> Unit
+    ) : RecyclerView.ViewHolder(view) {
+        private val cardNameTextView: TextView = view.findViewById(R.id.cardNameTextView)
+        private val cardNumberTextView: TextView = view.findViewById(R.id.cardNumberTextView)
+        private val cardView: com.google.android.material.card.MaterialCardView =
+            view.findViewById(R.id.cardView)
         private lateinit var card: Card
+        private var isInSelectionMode = false
 
         init {
             itemView.setOnClickListener {
-                onItemClick(card)
+                if (isInSelectionMode) {
+                    toggleSelection()
+                } else {
+                    onItemClick(card)
+                }
             }
             itemView.setOnLongClickListener {
-                onItemLongClick(card)
+                toggleSelection()
                 true
             }
         }
 
-        fun bind(card: Card, isSelected: Boolean, isSelectionMode: Boolean) {
+        private fun toggleSelection() {
+            cardView.isChecked = !cardView.isChecked
+            onItemLongClick(card)
+        }
+
+        fun bind(card: Card, isSelected: Boolean, isInSelectionMode: Boolean) {
             this.card = card
+
+            this.isInSelectionMode = isInSelectionMode
+
             cardNameTextView.text = card.cardName
             cardNumberTextView.text = card.cardNumber
-            checkBox.visibility = if (isSelectionMode) View.VISIBLE else View.GONE
-            checkBox.isChecked = isSelected
+
+            cardView.isChecked = isSelected
         }
     }
 
@@ -63,7 +83,6 @@ class CardAdapter(
         notifyDataSetChanged()
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     fun toggleSelection(card: Card) {
         if (selectedCards.contains(card)) {
             selectedCards.remove(card)
@@ -86,6 +105,12 @@ class CardAdapter(
 
     fun setSelectionMode(enabled: Boolean) {
         isSelectionMode = enabled
+        notifyDataSetChanged()
+    }
+
+    fun exitSelectionMode() {
+        isSelectionMode = false
+        selectedCards.clear()
         notifyDataSetChanged()
     }
 }
