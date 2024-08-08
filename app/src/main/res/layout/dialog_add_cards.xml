@@ -24,7 +24,7 @@
             android:textStyle="bold" />
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/textField"
+            android:id="@+id/cardNameLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/card_name">
@@ -39,6 +39,7 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/cardNumberLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/card_number">
@@ -54,9 +55,12 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/cardCVVLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/cvv"
+            app:counterEnabled="true"
+            app:counterMaxLength="3"
             app:endIconMode="password_toggle">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -70,9 +74,12 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/cardPinLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/pin"
+            app:counterEnabled="true"
+            app:counterMaxLength="4"
             app:endIconMode="password_toggle">
 
             <com.google.android.material.textfield.TextInputEditText

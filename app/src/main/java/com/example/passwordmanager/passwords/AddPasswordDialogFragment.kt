@@ -2,7 +2,9 @@ package com.example.passwordmanager.passwords
 
 import android.app.Dialog
 import android.os.Bundle
+import android.text.Editable
 import android.text.InputType
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.Button
@@ -13,6 +15,7 @@ import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentManager
 import com.example.passwordmanager.R
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.textfield.TextInputLayout
 
 class AddPasswordDialogFragment : DialogFragment() {
 
@@ -28,14 +31,20 @@ class AddPasswordDialogFragment : DialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_add_password, null)
-        val siteNameInput: EditText = dialogView.findViewById(R.id.siteNameInput)
-        siteNameInput.inputType = InputType.TYPE_CLASS_TEXT
         val passwordTitle: TextView = dialogView.findViewById(R.id.addOrUpdate)
+        val addButton: Button = dialogView.findViewById(R.id.addButton)
+        val cancelButton: Button = dialogView.findViewById(R.id.cancelButton)
+
+        val siteNameLayout: TextInputLayout = dialogView.findViewById(R.id.siteNameLayout)
+        val loginLayout: TextInputLayout = dialogView.findViewById(R.id.loginLayout)
+        val emailLayout: TextInputLayout = dialogView.findViewById(R.id.emailLayout)
+        val passwordLayout: TextInputLayout = dialogView.findViewById(R.id.passwordLayout)
+
+        val siteNameInput: EditText = dialogView.findViewById(R.id.siteNameInput)
         val loginInput: EditText = dialogView.findViewById(R.id.loginInput)
         val emailInput: EditText = dialogView.findViewById(R.id.emailInput)
         val passwordInput: EditText = dialogView.findViewById(R.id.passwordInput)
-        val addButton: Button = dialogView.findViewById(R.id.addButton)
-        val cancelButton: Button = dialogView.findViewById(R.id.cancelButton)
+
 
         // Check if arguments are passed for editing
         arguments?.let {
@@ -54,23 +63,41 @@ class AddPasswordDialogFragment : DialogFragment() {
             val email = emailInput.text.toString()
             val password = passwordInput.text.toString()
 
+            var wasError = false
+
             if (siteName.isEmpty()) {
-                siteNameInput.error = getString(R.string.input_at_least)
-                return@setOnClickListener
+                siteNameLayout.isErrorEnabled = true
+                siteNameLayout.error = getString(R.string.input_at_least)
+                wasError = true
+            } else {
+                siteNameLayout.isErrorEnabled = false
             }
 
             if (login.isEmpty()) {
-                loginInput.error = getString(R.string.input_at_least)
-                return@setOnClickListener
+                loginLayout.isErrorEnabled = true
+                loginLayout.error = getString(R.string.input_at_least)
+                wasError = true
+            } else {
+                loginLayout.isErrorEnabled = false
             }
 
             if (email.isEmpty()) {
-                emailInput.error = getString(R.string.input_at_least)
-                return@setOnClickListener
+                emailLayout.isErrorEnabled = true
+                emailLayout.error = getString(R.string.input_at_least)
+                wasError = true
+            } else {
+                emailLayout.isErrorEnabled = false
             }
 
             if (password.isEmpty()) {
-                passwordInput.error = getString(R.string.input_at_least)
+                passwordLayout.isErrorEnabled = true
+                passwordLayout.error = getString(R.string.input_at_least)
+                wasError = true
+            } else {
+                passwordLayout.isErrorEnabled = false
+            }
+
+            if (wasError){
                 return@setOnClickListener
             }
 

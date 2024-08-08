@@ -13,6 +13,7 @@ import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentManager
 import com.example.passwordmanager.R
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.textfield.TextInputLayout
 
 class AddCardDialogFragment : DialogFragment() {
 
@@ -31,6 +32,8 @@ class AddCardDialogFragment : DialogFragment() {
         val cardNameInput: TextView = dialogView.findViewById(R.id.cardNameInput)
         val cardTitleInput: TextView = dialogView.findViewById(R.id.addOrUpdate)
         val cardNumberInput: EditText = dialogView.findViewById(R.id.cardNumberInput)
+
+
         cardNumberInput.addTextChangedListener(object : TextWatcher {
             private var isUpdating = false
             private val space = ' '
@@ -63,6 +66,11 @@ class AddCardDialogFragment : DialogFragment() {
         val addButton: Button = dialogView.findViewById(R.id.addButton)
         val cancelButton: Button = dialogView.findViewById(R.id.cancelButton)
 
+        val cardNameLayout: TextInputLayout = dialogView.findViewById(R.id.cardNameLayout)
+        val cardNumberLayout: TextInputLayout = dialogView.findViewById(R.id.cardNumberLayout)
+        val cardCVVLayout: TextInputLayout = dialogView.findViewById(R.id.cardCVVLayout)
+        val cardPinLayout: TextInputLayout = dialogView.findViewById(R.id.cardPinLayout)
+
         // Check if arguments are passed for editing
         arguments?.let {
             cardNameInput.setText(it.getString("cardName"))
@@ -80,23 +88,41 @@ class AddCardDialogFragment : DialogFragment() {
             val cvv = cardCVVInput.text.toString()
             val pin = cardPinInput.text.toString()
 
+            var wasError = false
+
             if (cardName.isEmpty()) {
-                cardNameInput.error = getString(R.string.input_at_least)
-                return@setOnClickListener
+                cardNameLayout.isErrorEnabled = true
+                cardNameLayout.error = getString(R.string.input_at_least)
+                wasError = true
+            } else {
+                cardNameLayout.isErrorEnabled = false
             }
 
             if (number.length != 19) {
-                cardNumberInput.error = getString(R.string.card_numbers)
-                return@setOnClickListener
+                cardNumberLayout.isErrorEnabled = true
+                cardNumberLayout.error = getString(R.string.card_numbers)
+                wasError = true
+            } else {
+                cardNumberLayout.isErrorEnabled = false
             }
 
             if (cvv.length != 3) {
-                cardCVVInput.error = getString(R.string.cvv_length)
-                return@setOnClickListener
+                cardCVVLayout.isErrorEnabled = true
+                cardCVVLayout.error = getString(R.string.cvv_length)
+                wasError = true
+            } else {
+                cardCVVLayout.isErrorEnabled = false
             }
 
             if (pin.length != 4) {
-                cardPinInput.error = getString(R.string.pin_length)
+                cardPinLayout.isErrorEnabled = true
+                cardPinLayout.error = getString(R.string.pin_length)
+                wasError = true
+            } else {
+                cardPinLayout.isErrorEnabled = false
+            }
+
+            if(wasError){
                 return@setOnClickListener
             }
 
