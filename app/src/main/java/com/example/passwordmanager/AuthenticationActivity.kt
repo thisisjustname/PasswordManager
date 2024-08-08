@@ -19,10 +19,19 @@ class AuthenticationActivity : AppCompatActivity() {
     private lateinit var submitButton: Button
     private lateinit var useBiometricsButton: Button
     private lateinit var biometricPromptManager: BiometricPromptManager
+    private lateinit var preferencesManager: PreferencesManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_authentication)
+        preferencesManager = PreferencesManager(this)
+
+        if (!preferencesManager.isPinSet()) {
+            // Если PIN не установлен, переходим к PinSetupActivity
+            startActivity(Intent(this, PinSetupActivity::class.java))
+            finish()
+            return
+        }
 
         pinEditText = findViewById(R.id.pinEditText)
         submitButton = findViewById(R.id.submitButton)
@@ -59,12 +68,11 @@ class AuthenticationActivity : AppCompatActivity() {
     }
 
     private fun checkPin(enteredPin: String): Boolean {
-        val sharedPrefs = getSharedPreferences("AppPreferences", MODE_PRIVATE)
-        val savedPin = sharedPrefs.getString("PIN", "")
-        return enteredPin == savedPin
+        return enteredPin == preferencesManager.getPin()
     }
 
     private fun proceedToMainActivity() {
+        preferencesManager.setAuthenticated(true)
         val intent = Intent(this, MainActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
         startActivity(intent)

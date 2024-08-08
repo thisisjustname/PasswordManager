@@ -1,5 +1,6 @@
 package com.example.passwordmanager
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
@@ -16,10 +17,12 @@ class PinSetupActivity : AppCompatActivity() {
     private lateinit var submitButton: Button
     private lateinit var confirmPasswordView: com.google.android.material.textfield.TextInputLayout
     private var isConfirmationStep = false
+    private lateinit var preferencesManager: PreferencesManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_pin_setup)
+        preferencesManager = PreferencesManager(this)
 
         pinEditText = findViewById(R.id.pinEditText)
         confirmPinEditText = findViewById(R.id.confirmPinEditText)
@@ -50,7 +53,11 @@ class PinSetupActivity : AppCompatActivity() {
     }
 
     private fun savePin(pin: String) {
-        val sharedPrefs = getSharedPreferences("AppPreferences", MODE_PRIVATE)
-        sharedPrefs.edit().putString("PIN", pin).apply()
+        preferencesManager.savePin(pin)
+        preferencesManager.setAuthenticated(true)
+        val intent = Intent(this, MainActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+        startActivity(intent)
+        finish()
     }
 }

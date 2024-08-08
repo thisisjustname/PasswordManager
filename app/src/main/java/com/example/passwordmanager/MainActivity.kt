@@ -19,6 +19,7 @@ import com.plcoding.biometricauth.BiometricPromptManager
 class MainActivity : AppCompatActivity() {
     private lateinit var viewPager: ViewPager2
     private lateinit var tabLayout: TabLayout
+    private lateinit var preferencesManager: PreferencesManager
     private lateinit var biometricPromptManager: BiometricPromptManager
     private lateinit var appLifecycleHandler: AppLifecycleHandler
 
@@ -32,12 +33,11 @@ class MainActivity : AppCompatActivity() {
 
         biometricPromptManager = BiometricPromptManager(this)
 
-        if (!isPinSet()) {
-            startActivity(Intent(this, PinSetupActivity::class.java))
-        } else {
-            appLifecycleHandler = AppLifecycleHandler(this)
-            application.registerActivityLifecycleCallbacks(appLifecycleHandler)
-        }
+        preferencesManager = PreferencesManager(this)
+        appLifecycleHandler = AppLifecycleHandler(this, preferencesManager)
+        application.registerActivityLifecycleCallbacks(appLifecycleHandler)
+
+        checkAuthentication()
 
 
         val sharedPreferences = getSharedPreferences("AppPreferences", MODE_PRIVATE)
@@ -59,9 +59,31 @@ class MainActivity : AppCompatActivity() {
         }.attach()
     }
 
+    override fun onResume() {
+        super.onResume()
+        checkAuthentication()
+    }
+
     private fun isPinSet(): Boolean {
         val sharedPrefs = getSharedPreferences("AppPreferences", MODE_PRIVATE)
         return sharedPrefs.contains("PIN")
+    }
+
+    private fun checkAuthentication() {
+        if (!preferencesManager.isPinSet()) {
+            // Если PIN не установлен, переходим к PinSetupActivity
+            startActivity(Intent(this, PinSetupActivity::class.java))
+            finish()
+        } else if (!preferencesManager.isAuthenticated()) {
+            // Если PIN установлен, но пользователь не аутентифицирован
+            startAuthenticationActivity()
+        }
+    }
+
+    private fun startAuthenticationActivity() {
+        val intent = Intent(this, AuthenticationActivity::class.java)
+        startActivity(intent)
+        finish()  // Завершаем MainActivity, чтобы пользователь не мог вернуться назад без аутентификации
     }
 
     override fun onDestroy() {

@@ -7,16 +7,22 @@ import android.content.Intent
 import android.os.Bundle
 import com.plcoding.biometricauth.BiometricPromptManager
 
-class AppLifecycleHandler(private val context: Context) : Application.ActivityLifecycleCallbacks {
+class AppLifecycleHandler(private val context: Context,  private val preferencesManager: PreferencesManager) : Application.ActivityLifecycleCallbacks {
     private var appInBackground = false
 
     override fun onActivityResumed(activity: Activity) {
-        if (appInBackground && activity !is AuthenticationActivity) {
+        if (appInBackground) {
             appInBackground = false
-            // Приложение вернулось с фона, запускаем аутентификацию
-            val intent = Intent(context, AuthenticationActivity::class.java)
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            context.startActivity(intent)
+            preferencesManager.setAuthenticated(false)
+            if (activity !is AuthenticationActivity && activity !is PinSetupActivity) {
+                val intent = if (preferencesManager.isPinSet()) {
+                    Intent(context, AuthenticationActivity::class.java)
+                } else {
+                    Intent(context, PinSetupActivity::class.java)
+                }
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                context.startActivity(intent)
+            }
         }
     }
 
