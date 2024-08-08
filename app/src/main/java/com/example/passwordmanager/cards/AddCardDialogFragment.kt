@@ -77,8 +77,8 @@ class AddCardDialogFragment : DialogFragment() {
             cardNumberInput.setText(it.getString("number"))
             cardCVVInput.setText(it.getString("cvv"))
             cardPinInput.setText(it.getString("pin"))
-            cardTitleInput.setText("Update Card")
-            addButton.setText("Update")
+            cardTitleInput.setText(R.string.update_card)
+            addButton.setText(R.string.update)
             cancelButton.visibility = View.GONE
         }
 

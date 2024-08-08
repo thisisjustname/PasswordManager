@@ -32,4 +32,7 @@
     <string name="app_pin_length">PIN must be 6 digits</string>
     <string name="pins_not_match">PINs do not match</string>
     <string name="incorrect_pin">Incorrect PIN</string>
+    <string name="update_card">Update card</string>
+    <string name="update">Update</string>
+    <string name="update_password">Update password</string>
 </resources>

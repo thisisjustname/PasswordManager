@@ -52,8 +52,8 @@ class AddPasswordDialogFragment : DialogFragment() {
             loginInput.setText(it.getString("login"))
             emailInput.setText(it.getString("email"))
             passwordInput.setText(it.getString("password"))
-            passwordTitle.setText("Update Password")
-            addButton.setText("Update")
+            passwordTitle.setText(R.string.update_password)
+            addButton.setText(R.string.update)
             cancelButton.visibility = View.GONE
         }
 

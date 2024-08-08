@@ -30,4 +30,7 @@
     <string name="app_pin_length">Пинкод должен содержать 6 символов</string>
     <string name="pins_not_match">Пинкоды не совпадают</string>
     <string name="incorrect_pin">Не верный пароль</string>
+    <string name="update_card">Обновить карточку</string>
+    <string name="update">Обновить</string>
+    <string name="update_password">Обновить пароль</string>
 </resources>
