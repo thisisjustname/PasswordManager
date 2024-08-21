@@ -35,4 +35,6 @@
     <string name="update_card">Update card</string>
     <string name="update">Update</string>
     <string name="update_password">Update password</string>
+    <string name="add_new_document">Add new document</string>
+    <string name="document_name">Document name</string>
 </resources>

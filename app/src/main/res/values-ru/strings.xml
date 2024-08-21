@@ -33,4 +33,6 @@
     <string name="update_card">Обновить карточку</string>
     <string name="update">Обновить</string>
     <string name="update_password">Обновить пароль</string>
+    <string name="add_new_document">Добавить новый документ</string>
+    <string name="document_name">Название документа</string>
 </resources>

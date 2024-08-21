@@ -1,4 +1,4 @@
-package com.plcoding.biometricauth
+package com.example.passwordmanager
 
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity

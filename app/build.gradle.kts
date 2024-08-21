@@ -48,6 +48,11 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
+    implementation ("com.google.android.flexbox:flexbox:3.0.0")
+    implementation ("androidx.security:security-crypto:1.1.0-alpha06")
+    implementation ("androidx.paging:paging-runtime-ktx:3.1.1")
+    implementation("com.github.bumptech.glide:glide:4.12.0")
+
     implementation("androidx.biometric:biometric:1.1.0")
     implementation ("com.google.android.material:material:1.8.0")
     implementation("androidx.security:security-crypto:1.1.0-alpha06")

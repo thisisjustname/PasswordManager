@@ -1,6 +1,6 @@
 package com.example.passwordmanager.cards
 
-import DataManager
+import com.example.passwordmanager.DataManager
 import android.annotation.SuppressLint
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -13,19 +13,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import android.widget.Button
-import android.widget.EditText
-import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.passwordmanager.R
-import com.example.passwordmanager.passwords.AddPasswordDialogFragment
-import com.example.passwordmanager.passwords.Password
-import com.example.passwordmanager.passwords.PasswordAdapter
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.search.SearchBar
 
 class CardsFragment : Fragment(), AddCardDialogFragment.AddCardListener {
     private lateinit var recyclerView: RecyclerView

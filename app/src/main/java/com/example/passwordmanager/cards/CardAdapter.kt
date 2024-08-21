@@ -1,15 +1,12 @@
 package com.example.passwordmanager.cards
 
 import android.annotation.SuppressLint
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.CheckBox
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.passwordmanager.R
-import com.example.passwordmanager.passwords.Password
 
 // Обновление адаптера для обработки долгого нажатия и управления режимом выбора
 class CardAdapter(

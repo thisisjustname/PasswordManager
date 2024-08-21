@@ -1,8 +1,7 @@
 package com.example.passwordmanager.passwords
-import DataManager
-import com.example.passwordmanager.R
 
 
+import com.example.passwordmanager.DataManager
 import android.annotation.SuppressLint
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -10,7 +9,6 @@ import android.content.Context
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -19,8 +17,7 @@ import android.widget.*
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.passwordmanager.cards.AddCardDialogFragment
-import com.example.passwordmanager.cards.CardAdapter
+import com.example.passwordmanager.R
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class PasswordsFragment : Fragment(), AddPasswordDialogFragment.AddPasswordListener {
@@ -29,7 +26,6 @@ class PasswordsFragment : Fragment(), AddPasswordDialogFragment.AddPasswordListe
     private val passwords = mutableListOf<Password>()
     private val filteredPasswords = mutableListOf<Password>()
     private lateinit var secureStorage: DataManager
-    private var isSelectionMode = false
     private lateinit var deleteButton: Button
     private lateinit var searchBar: com.google.android.material.search.SearchBar
     private lateinit var searchView: com.google.android.material.search.SearchView
