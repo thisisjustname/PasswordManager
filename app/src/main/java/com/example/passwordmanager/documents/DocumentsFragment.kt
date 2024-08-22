@@ -2,12 +2,13 @@ package com.example.passwordmanager.documents
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.app.ActivityOptionsCompat
+import androidx.core.util.Pair
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -38,26 +39,30 @@ class DocumentsFragment : Fragment() {
 
     private fun setupRecyclerView() {
         recyclerView.layoutManager = LinearLayoutManager(context)
-        adapter = DocumentAdapter(documents) { document, cardView, titleView ->
-            openDocumentInfo(document, cardView, titleView)
+        adapter = DocumentAdapter(documents) { document, cardView, titleView, thumbnails ->
+            openDocumentInfo(document, cardView, titleView, thumbnails)
         }
         recyclerView.adapter = adapter
     }
 
-    private fun openDocumentInfo(document: Document, cardView: View, titleView: TextView) {
+    private fun openDocumentInfo(document: Document, cardView: View, titleView: TextView, thumbnails: List<ImageView>) {
         val intent = Intent(context, DocumentInfoActivity::class.java).apply {
             putExtra("DOCUMENT_ID", document.id)
         }
 
-        Log.d("DocumentsFragment", "Opening document with ID: ${document.id}")
+        val pairs = mutableListOf<Pair<View, String>>()
+        pairs.add(Pair(cardView as View, "documentCard_${document.id}"))
+        pairs.add(Pair(titleView as View, "documentTitle_${document.id}"))
 
-        val cardPair = androidx.core.util.Pair(cardView as View, "documentCard_${document.id}")
-        val titlePair = androidx.core.util.Pair(titleView as View, "documentTitle_${document.id}")
+        thumbnails.forEachIndexed { index, imageView ->
+            if (imageView.visibility == View.VISIBLE) {
+                pairs.add(Pair(imageView as View, "documentImage_${document.id}_$index"))
+            }
+        }
 
         val options = ActivityOptionsCompat.makeSceneTransitionAnimation(
             requireActivity(),
-            cardPair,
-            titlePair
+            *pairs.toTypedArray()
         )
 
         startActivity(intent, options.toBundle())

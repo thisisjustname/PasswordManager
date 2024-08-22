@@ -4,20 +4,21 @@ import android.app.ActivityOptions
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
+import android.view.ViewTreeObserver
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
+import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.passwordmanager.AuthenticationActivity
 import com.example.passwordmanager.FullImageActivity
-import com.example.passwordmanager.PinSetupActivity
-import com.example.passwordmanager.PreferencesManager
 import com.example.passwordmanager.R
 import com.example.passwordmanager.SecureImageStorage
 import com.example.passwordmanager.ImageAdapter
+import com.example.passwordmanager.PinSetupActivity
+import com.example.passwordmanager.PreferencesManager
 
 class DocumentInfoActivity : AppCompatActivity() {
     private lateinit var titleTextView: TextView
@@ -32,12 +33,11 @@ class DocumentInfoActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_document_info)
 
-        // Отложим переход, пока не загрузим данные
-        supportPostponeEnterTransition()
+        postponeEnterTransition()
 
         titleTextView = findViewById(R.id.documentTitleTextView)
         recyclerView = findViewById(R.id.imagesRecyclerView)
-        cardView = findViewById(R.id.documentCardView)  // Добавьте эту строку
+        cardView = findViewById(R.id.documentCardView)
 
         secureStorage = SecureImageStorage(this)
         documentStorage = DocumentStorage(this)
@@ -51,12 +51,16 @@ class DocumentInfoActivity : AppCompatActivity() {
             if (document != null) {
                 displayDocument(document)
 
-                // Установим transition name для анимируемых элементов
-                cardView.transitionName = "documentCard_${document.id}"
-                titleTextView.transitionName = "documentTitle_${document.id}"
+                ViewCompat.setTransitionName(cardView, "documentCard_${document.id}")
+                ViewCompat.setTransitionName(titleTextView, "documentTitle_${document.id}")
 
-                // Запустим отложенный переход
-                supportStartPostponedEnterTransition()
+                recyclerView.viewTreeObserver.addOnPreDrawListener(object : ViewTreeObserver.OnPreDrawListener {
+                    override fun onPreDraw(): Boolean {
+                        recyclerView.viewTreeObserver.removeOnPreDrawListener(this)
+                        startPostponedEnterTransition()
+                        return true
+                    }
+                })
             } else {
                 showErrorAndFinish()
             }
@@ -84,29 +88,30 @@ class DocumentInfoActivity : AppCompatActivity() {
     }
 
     private fun loadDocument(documentId: String): Document? {
-        return try {
-            documentStorage.getDocumentById(documentId)
-        } catch (e: Exception) {
-            Log.e("DocumentInfoActivity", "Error loading document: ${e.message}")
-            null
-        }
+        return documentStorage.getDocumentById(documentId)
     }
 
     private fun displayDocument(document: Document) {
         titleTextView.text = document.name
-        loadImages(document.fileNames)
+        loadImages(document)
     }
 
-    private fun loadImages(fileNames: List<String>) {
-        val uris = fileNames.mapNotNull { fileName ->
-            try {
-                secureStorage.getDecryptedImage(fileName)?.let { Uri.fromFile(it) }
-            } catch (e: Exception) {
-                Log.e("DocumentInfoActivity", "Error decrypting image $fileName: ${e.message}")
-                null
-            }
+    private fun loadImages(document: Document) {
+        val imageUris = document.fileNames.mapNotNull { fileName ->
+            secureStorage.getDecryptedImage(fileName)?.let { Uri.fromFile(it) }
         }
-        imageAdapter.submitList(uris)
+        imageAdapter.submitList(imageUris)
+
+        // Set transition names for images
+        recyclerView.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+            override fun onGlobalLayout() {
+                recyclerView.viewTreeObserver.removeOnGlobalLayoutListener(this)
+                for (i in 0 until recyclerView.childCount) {
+                    val view = recyclerView.getChildAt(i)
+                    ViewCompat.setTransitionName(view, "documentImage_${document.id}_$i")
+                }
+            }
+        })
     }
 
     private fun showErrorAndFinish() {
