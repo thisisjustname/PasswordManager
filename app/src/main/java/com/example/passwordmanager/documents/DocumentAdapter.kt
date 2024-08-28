@@ -8,8 +8,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
-import com.bumptech.glide.request.RequestOptions
+import coil.load
 import com.example.passwordmanager.R
 import com.example.passwordmanager.SecureImageStorage
 
@@ -62,10 +61,10 @@ class DocumentAdapter(
                 holder.thumbnails[i].visibility = View.VISIBLE
                 holder.thumbnails[i].transitionName = "documentImage_${document.id}_$i"
 
-                Glide.with(holder.itemView.context)
-                    .load(imageUris[i])
-                    .apply(RequestOptions().fitCenter())
-                    .into(holder.thumbnails[i])
+                holder.thumbnails[i].load(imageUris[i]) {
+                    crossfade(true)
+                    placeholder(R.drawable.shimmer_placeholder)
+                }
             } else {
                 holder.thumbnailContainers[i].visibility = View.GONE
                 holder.thumbnails[i].visibility = View.GONE
