@@ -50,6 +50,7 @@
         <item name="android:windowContentTransitions">true</item>
         <item name="android:windowSharedElementEnterTransition">@transition/image_transition</item>
         <item name="android:windowSharedElementExitTransition">@transition/image_transition</item>
+        <item name="android:windowActivityTransitions">true</item>
     </style>
 
     <style name="Theme.PasswordManager" parent="Base.Theme.PasswordManager" />

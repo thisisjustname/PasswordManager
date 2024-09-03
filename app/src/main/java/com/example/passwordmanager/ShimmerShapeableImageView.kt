@@ -25,13 +25,11 @@ class ShimmerShapeableImageView @JvmOverloads constructor(
 
     fun startShimmerAnimation() {
         val animation = AnimationUtils.loadAnimation(context, R.anim.shimmer_animation)
-        Log.d("ShimmerImageView", "Starting shimmer animation")
         startAnimation(animation)
     }
 
     fun stopShimmerAnimation() {
         clearAnimation()
-        Log.d("ShimmerImageView", "Starting stopped animation")
         background = null
     }
 

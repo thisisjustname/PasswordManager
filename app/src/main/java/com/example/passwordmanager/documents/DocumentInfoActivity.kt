@@ -4,6 +4,12 @@ import android.app.ActivityOptions
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.transition.ChangeBounds
+import android.transition.ChangeImageTransform
+import android.transition.ChangeTransform
+import android.transition.Explode
+import android.transition.TransitionSet
+import android.util.Log
 import android.view.ViewTreeObserver
 import android.widget.TextView
 import android.widget.Toast
@@ -33,6 +39,10 @@ class DocumentInfoActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_document_info)
 
+        setupWindowAnimations()
+
+        window.enterTransition = Explode()
+
         postponeEnterTransition()
 
         titleTextView = findViewById(R.id.documentTitleTextView)
@@ -43,29 +53,20 @@ class DocumentInfoActivity : AppCompatActivity() {
         documentStorage = DocumentStorage(this)
         preferencesManager = PreferencesManager(this)
 
-        setupRecyclerView()
-
         val documentId = intent.getStringExtra("DOCUMENT_ID")
         if (documentId != null) {
-            val document = loadDocument(documentId)
-            if (document != null) {
-                displayDocument(document)
+            ViewCompat.setTransitionName(cardView, "documentCard_$documentId")
+            ViewCompat.setTransitionName(titleTextView, "documentTitle_$documentId")
+        }
+        val imageUris = intent.getParcelableArrayListExtra<Uri>("IMAGE_URIS")
 
-                ViewCompat.setTransitionName(cardView, "documentCard_${document.id}")
-                ViewCompat.setTransitionName(titleTextView, "documentTitle_${document.id}")
+        recyclerView = findViewById(R.id.imagesRecyclerView)
+        setupRecyclerView()
 
-                recyclerView.viewTreeObserver.addOnPreDrawListener(object : ViewTreeObserver.OnPreDrawListener {
-                    override fun onPreDraw(): Boolean {
-                        recyclerView.viewTreeObserver.removeOnPreDrawListener(this)
-                        startPostponedEnterTransition()
-                        return true
-                    }
-                })
-            } else {
-                showErrorAndFinish()
-            }
+        if (documentId != null && imageUris != null) {
+            loadDocument(documentId, imageUris)
         } else {
-            showErrorAndFinish()
+            // Обработка ошибки
         }
     }
 
@@ -87,8 +88,26 @@ class DocumentInfoActivity : AppCompatActivity() {
 
     }
 
-    private fun loadDocument(documentId: String): Document? {
-        return documentStorage.getDocumentById(documentId)
+    private fun loadDocument(documentId: String, imageUris: List<Uri>) {
+        val document = documentStorage.getDocumentById(documentId)
+        if (document != null) {
+            titleTextView.text = document.name
+            imageAdapter.submitList(imageUris)
+
+            recyclerView.viewTreeObserver.addOnPreDrawListener(object : ViewTreeObserver.OnPreDrawListener {
+                override fun onPreDraw(): Boolean {
+                    recyclerView.viewTreeObserver.removeOnPreDrawListener(this)
+                    for (i in 0 until recyclerView.childCount) {
+                        val view = recyclerView.getChildAt(i)
+                        ViewCompat.setTransitionName(view, "documentImage_${document.id}_$i")
+                    }
+                    startPostponedEnterTransition()
+                    return true
+                }
+            })
+        } else {
+            // Обработка ошибки
+        }
     }
 
     private fun displayDocument(document: Document) {
@@ -109,6 +128,7 @@ class DocumentInfoActivity : AppCompatActivity() {
                 for (i in 0 until recyclerView.childCount) {
                     val view = recyclerView.getChildAt(i)
                     ViewCompat.setTransitionName(view, "documentImage_${document.id}_$i")
+                    Log.d("DocumentsFragment", "DocumentInfoActivity Added transition name for image documentImage_${document.id}_$i")
                 }
             }
         })
@@ -134,5 +154,16 @@ class DocumentInfoActivity : AppCompatActivity() {
         }
         startActivity(intent)
         finish()  // Закрываем DocumentInfoActivity, чтобы пользователь не мог вернуться к ней без аутентификации
+    }
+
+    private fun setupWindowAnimations() {
+        val transition = TransitionSet().apply {
+            addTransition(ChangeBounds())
+            addTransition(ChangeTransform())
+            addTransition(ChangeImageTransform())
+            duration = 300 // или другое подходящее значение
+        }
+        window.sharedElementEnterTransition = transition
+        window.sharedElementReturnTransition = transition
     }
 }

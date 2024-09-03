@@ -27,6 +27,10 @@ class ImageAdapter(
         holder.imageView.transitionName = "image_$position"
         holder.imageView.startShimmerAnimation()
 
+        holder.imageView.setOnClickListener {
+            onItemClick?.invoke(uri, holder.imageView)
+        }
+
         holder.imageView.load(uri) {
             size(600, 600)
             listener(

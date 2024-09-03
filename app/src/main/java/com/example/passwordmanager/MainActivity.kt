@@ -2,6 +2,10 @@ package com.example.passwordmanager
 
 import android.content.Intent
 import android.os.Bundle
+import android.transition.ChangeBounds
+import android.transition.ChangeImageTransform
+import android.transition.ChangeTransform
+import android.transition.TransitionSet
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayout
@@ -17,6 +21,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        setupWindowAnimations()
 
         preferencesManager = PreferencesManager(this)
         biometricPromptManager = BiometricPromptManager(this)
@@ -62,5 +68,16 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         application.unregisterActivityLifecycleCallbacks(appLifecycleHandler)
+    }
+
+    private fun setupWindowAnimations() {
+        val transition = TransitionSet().apply {
+            addTransition(ChangeBounds())
+            addTransition(ChangeTransform())
+            addTransition(ChangeImageTransform())
+            duration = 300 // или другое подходящее значение
+        }
+        window.sharedElementEnterTransition = transition
+        window.sharedElementReturnTransition = transition
     }
 }
