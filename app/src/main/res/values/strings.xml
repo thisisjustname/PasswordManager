@@ -49,4 +49,11 @@
     <string name="screenshot_protection_disabled_description">Screenshot protection is disabled. It is recommended to enable it for increased security</string>
     <string name="dynamic_colors_description">The theme of the application corresponds to the color theme of the device</string>
     <string name="generate_password">Generate password</string>
+    <string name="password_settings">Password settings</string>
+    <string name="use_special_characters">Use special characters</string>
+    <string name="use_numbers">Use numbers</string>
+    <string name="use_uppercase">Use uppercase</string>
+    <string name="password_length">Password length</string>
+    <string name="regenerate_password">Regenerate password</string>
+    <string name="confirm">Сonfirm</string>
 </resources>

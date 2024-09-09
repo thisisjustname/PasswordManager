@@ -15,6 +15,10 @@ import com.google.android.material.textfield.TextInputLayout
 
 class AddPasswordDialogFragment : DialogFragment() {
 
+    private lateinit var generatePasswordButton: Button
+    private lateinit var passwordGenerator: PasswordGenerator
+    private lateinit var passwordInput: EditText
+
     interface AddPasswordListener {
         fun onPasswordAdded(password: Password)
     }
@@ -39,7 +43,15 @@ class AddPasswordDialogFragment : DialogFragment() {
         val siteNameInput: EditText = dialogView.findViewById(R.id.siteNameInput)
         val loginInput: EditText = dialogView.findViewById(R.id.loginInput)
         val emailInput: EditText = dialogView.findViewById(R.id.emailInput)
-        val passwordInput: EditText = dialogView.findViewById(R.id.passwordInput)
+        passwordInput = dialogView.findViewById(R.id.passwordInput)
+
+        generatePasswordButton = dialogView.findViewById(R.id.generatePasswordButton)
+        passwordGenerator = PasswordGenerator()
+
+        generatePasswordButton.setOnClickListener {
+            showPasswordGeneratorDialog()
+        }
+
 
 
         // Check if arguments are passed for editing
@@ -109,6 +121,52 @@ class AddPasswordDialogFragment : DialogFragment() {
         return MaterialAlertDialogBuilder(requireContext())
             .setView(dialogView)
             .create()
+    }
+
+    private fun showPasswordGeneratorDialog() {
+        val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_generate_password, null)
+        val useSpecialChars: androidx.appcompat.widget.SwitchCompat = dialogView.findViewById(R.id.useSpecialChars)
+        val useNumbers: androidx.appcompat.widget.SwitchCompat = dialogView.findViewById(R.id.useNumbers)
+        val useUppercase: androidx.appcompat.widget.SwitchCompat = dialogView.findViewById(R.id.useUppercase)
+        val lengthSlider: com.google.android.material.slider.Slider = dialogView.findViewById(R.id.lengthSlider)
+        val generatedPasswordText: TextView = dialogView.findViewById(R.id.generatedPasswordText)
+        val regenerateButton: Button = dialogView.findViewById(R.id.regenerateButton)
+        val confirmButton: Button = dialogView.findViewById(R.id.confirmButton)
+        val cancelButton: Button = dialogView.findViewById(R.id.cancelButton)
+
+        fun updatePassword() {
+            val password = passwordGenerator.generatePassword(
+                length = lengthSlider.value.toInt(),
+                useSpecialChars = useSpecialChars.isChecked,
+                useNumbers = useNumbers.isChecked,
+                useUppercase = useUppercase.isChecked
+            )
+            generatedPasswordText.text = password
+        }
+
+        useSpecialChars.setOnCheckedChangeListener { _, _ -> updatePassword() }
+        useNumbers.setOnCheckedChangeListener { _, _ -> updatePassword() }
+        useUppercase.setOnCheckedChangeListener { _, _ -> updatePassword() }
+        lengthSlider.addOnChangeListener { _, _, _ -> updatePassword() }
+
+        regenerateButton.setOnClickListener { updatePassword() }
+
+        updatePassword() // Generate initial password
+
+        val dialog = MaterialAlertDialogBuilder(requireContext())
+            .setView(dialogView)
+            .create()
+
+        confirmButton.setOnClickListener {
+            passwordInput.setText(generatedPasswordText.text)
+            dialog.dismiss()
+        }
+
+        cancelButton.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialog.show()
     }
 
     companion object {

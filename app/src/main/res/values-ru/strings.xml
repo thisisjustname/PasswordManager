@@ -47,4 +47,11 @@
     <string name="screenshot_protection_enabled_description">Защита от скриншотов включена</string>
     <string name="screenshot_protection_disabled_description">Защита от скриншотов выключена. Рекомендуется включить для повышения безопасности</string>
     <string name="generate_password">Генерация пароля</string>
+    <string name="password_settings">Настройки пароля</string>
+    <string name="use_special_characters">Использовать спецальные символы</string>
+    <string name="use_numbers">Использовать цифры</string>
+    <string name="use_uppercase">Использовать заглавные буквы</string>
+    <string name="password_length">Длинна пароля</string>
+    <string name="regenerate_password">Повторная генерация</string>
+    <string name="confirm">Подтвердить</string>
 </resources>
