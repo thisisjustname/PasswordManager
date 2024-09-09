@@ -9,7 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 
-class AuthenticationActivity : AppCompatActivity() {
+class AuthenticationActivity : AppCompatActivity(), SecuritySettingsListener  {
     private lateinit var pinEditText: EditText
     private lateinit var submitButton: Button
     private lateinit var useBiometricsButton: Button
@@ -17,9 +17,13 @@ class AuthenticationActivity : AppCompatActivity() {
     private lateinit var preferencesManager: PreferencesManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        ThemeHelper.applyTheme(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_authentication)
         preferencesManager = PreferencesManager(this)
+
+        ScreenshotProtectionHelper.applyScreenshotProtection(this)
+        (application as MyApp).addSecuritySettingsListener(this)
 
         if (!preferencesManager.isPinSet()) {
             // Если PIN не установлен, переходим к PinSetupActivity
@@ -64,6 +68,15 @@ class AuthenticationActivity : AppCompatActivity() {
 
     private fun checkPin(enteredPin: String): Boolean {
         return enteredPin == preferencesManager.getPin()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        (application as MyApp).removeSecuritySettingsListener(this)
+    }
+
+    override fun onSecuritySettingsChanged() {
+        ScreenshotProtectionHelper.applyScreenshotProtection(this)
     }
 
     private fun proceedToMainActivity() {

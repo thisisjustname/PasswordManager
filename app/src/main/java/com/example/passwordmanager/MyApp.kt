@@ -2,12 +2,24 @@ package com.example.passwordmanager
 
 import android.app.Application
 import android.util.Log
-import com.google.android.material.color.DynamicColors
 
 class MyApp : Application() {
+    private val securitySettingsListeners = mutableListOf<SecuritySettingsListener>()
+
     override fun onCreate() {
         super.onCreate()
         Log.d("MainActivity", "hello")
-        DynamicColors.applyToActivitiesIfAvailable(this)
+    }
+
+    fun addSecuritySettingsListener(listener: SecuritySettingsListener) {
+        securitySettingsListeners.add(listener)
+    }
+
+    fun removeSecuritySettingsListener(listener: SecuritySettingsListener) {
+        securitySettingsListeners.remove(listener)
+    }
+
+    fun notifySecuritySettingsChanged() {
+        securitySettingsListeners.forEach { it.onSecuritySettingsChanged() }
     }
 }

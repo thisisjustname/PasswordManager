@@ -23,10 +23,14 @@ import com.example.passwordmanager.FullImageActivity
 import com.example.passwordmanager.R
 import com.example.passwordmanager.SecureImageStorage
 import com.example.passwordmanager.ImageAdapter
+import com.example.passwordmanager.MyApp
 import com.example.passwordmanager.PinSetupActivity
 import com.example.passwordmanager.PreferencesManager
+import com.example.passwordmanager.ScreenshotProtectionHelper
+import com.example.passwordmanager.SecuritySettingsListener
+import com.example.passwordmanager.ThemeHelper
 
-class DocumentInfoActivity : AppCompatActivity() {
+class DocumentInfoActivity : AppCompatActivity(), SecuritySettingsListener {
     private lateinit var titleTextView: TextView
     private lateinit var recyclerView: RecyclerView
     private lateinit var imageAdapter: ImageAdapter
@@ -36,8 +40,12 @@ class DocumentInfoActivity : AppCompatActivity() {
     private lateinit var cardView: CardView
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        ThemeHelper.applyTheme(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_document_info)
+
+        ScreenshotProtectionHelper.applyScreenshotProtection(this)
+        (application as MyApp).addSecuritySettingsListener(this)
 
         setupWindowAnimations()
 
@@ -154,6 +162,15 @@ class DocumentInfoActivity : AppCompatActivity() {
         }
         startActivity(intent)
         finish()  // Закрываем DocumentInfoActivity, чтобы пользователь не мог вернуться к ней без аутентификации
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        (application as MyApp).removeSecuritySettingsListener(this)
+    }
+
+    override fun onSecuritySettingsChanged() {
+        ScreenshotProtectionHelper.applyScreenshotProtection(this)
     }
 
     private fun setupWindowAnimations() {

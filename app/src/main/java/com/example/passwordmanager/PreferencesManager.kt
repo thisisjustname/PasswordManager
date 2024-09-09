@@ -28,4 +28,20 @@ class PreferencesManager(context: Context) {
     fun clearAllData() {
         prefs.edit().clear().apply()
     }
+
+    fun setUseDynamicColors(useDynamic: Boolean) {
+        prefs.edit().putBoolean("use_dynamic_colors", useDynamic).apply()
+    }
+
+    fun useDynamicColors(): Boolean {
+        return prefs.getBoolean("use_dynamic_colors", true) // По умолчанию используем динамические цвета
+    }
+
+    fun setScreenshotProtection(enabled: Boolean) {
+        prefs.edit().putBoolean("screenshot_protection", enabled).apply()
+    }
+
+    fun isScreenshotProtectionEnabled(): Boolean {
+        return prefs.getBoolean("screenshot_protection", false) // По умолчанию выключено
+    }
 }

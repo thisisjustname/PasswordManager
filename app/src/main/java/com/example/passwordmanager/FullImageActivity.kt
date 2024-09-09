@@ -8,10 +8,14 @@ import androidx.core.view.ViewCompat
 import coil.load
 import coil.transform.CircleCropTransformation
 
-class FullImageActivity : AppCompatActivity() {
+class FullImageActivity : AppCompatActivity(), SecuritySettingsListener  {
     override fun onCreate(savedInstanceState: Bundle?) {
+        ThemeHelper.applyTheme(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_full_image)
+
+        ScreenshotProtectionHelper.applyScreenshotProtection(this)
+        (application as MyApp).addSecuritySettingsListener(this)
 
         val imageView: ZoomableImageView = findViewById(R.id.fullImageView)
         val closeButton: ImageView = findViewById(R.id.closeButton)
@@ -43,4 +47,14 @@ class FullImageActivity : AppCompatActivity() {
             finishAfterTransition()
         }
     }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        (application as MyApp).removeSecuritySettingsListener(this)
+    }
+
+    override fun onSecuritySettingsChanged() {
+        ScreenshotProtectionHelper.applyScreenshotProtection(this)
+    }
+
 }

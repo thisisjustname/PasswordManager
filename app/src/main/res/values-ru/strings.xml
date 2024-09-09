@@ -35,4 +35,16 @@
     <string name="update_password">Обновить пароль</string>
     <string name="add_new_document">Добавить новый документ</string>
     <string name="document_name">Название документа</string>
+    <string name="settings">Настройки</string>
+    <string name="custom_theme_description">Цвета приложения будут соответствовать цветам по умолчанию</string>
+    <string name="system_theme_description">Цвета приложения будут соответствовать палитре цветов системы</string>
+    <string name="theme_settings">Настройки темы</string>
+    <string name="dynamic_colors_description">Тема приложения соответствуют цветовой теме устройства</string>
+    <string name="use_custom_theme">Использование темы по умолчанию</string>
+    <string name="use_dynamic_colors">Использование динамических цветов</string>
+    <string name="security_settings">Настройки безопастности</string>
+    <string name="enable_screenshot_protection">Включить защиту от скриншотов</string>
+    <string name="screenshot_protection_enabled_description">Защита от скриншотов включена</string>
+    <string name="screenshot_protection_disabled_description">Защита от скриншотов выключена. Рекомендуется включить для повышения безопасности</string>
+    <string name="generate_password">Генерация пароля</string>
 </resources>
