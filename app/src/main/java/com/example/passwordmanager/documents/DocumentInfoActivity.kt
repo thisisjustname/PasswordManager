@@ -9,26 +9,20 @@ import android.transition.ChangeImageTransform
 import android.transition.ChangeTransform
 import android.transition.Explode
 import android.transition.TransitionSet
-import android.util.Log
+import android.view.View
 import android.view.ViewTreeObserver
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import androidx.core.view.ViewCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.passwordmanager.AuthenticationActivity
-import com.example.passwordmanager.FullImageActivity
-import com.example.passwordmanager.R
-import com.example.passwordmanager.SecureImageStorage
-import com.example.passwordmanager.ImageAdapter
-import com.example.passwordmanager.MyApp
-import com.example.passwordmanager.PinSetupActivity
-import com.example.passwordmanager.PreferencesManager
-import com.example.passwordmanager.ScreenshotProtectionHelper
-import com.example.passwordmanager.SecuritySettingsListener
-import com.example.passwordmanager.ThemeHelper
+import com.example.passwordmanager.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class DocumentInfoActivity : AppCompatActivity(), SecuritySettingsListener {
     private lateinit var titleTextView: TextView
@@ -40,16 +34,14 @@ class DocumentInfoActivity : AppCompatActivity(), SecuritySettingsListener {
     private lateinit var cardView: CardView
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        ThemeHelper.applyTheme(this)
         super.onCreate(savedInstanceState)
+        ThemeHelper.applyTheme(this)
         setContentView(R.layout.activity_document_info)
 
         ScreenshotProtectionHelper.applyScreenshotProtection(this)
         (application as MyApp).addSecuritySettingsListener(this)
 
         setupWindowAnimations()
-
-        window.enterTransition = Explode()
 
         postponeEnterTransition()
 
@@ -62,19 +54,21 @@ class DocumentInfoActivity : AppCompatActivity(), SecuritySettingsListener {
         preferencesManager = PreferencesManager(this)
 
         val documentId = intent.getStringExtra("DOCUMENT_ID")
-        if (documentId != null) {
+        val documentName = intent.getStringExtra("DOCUMENT_NAME")
+        val imageUriStrings = intent.getStringArrayListExtra("IMAGE_URIS")
+
+        if (documentId != null && documentName != null && imageUriStrings != null) {
             ViewCompat.setTransitionName(cardView, "documentCard_$documentId")
             ViewCompat.setTransitionName(titleTextView, "documentTitle_$documentId")
-        }
-        val imageUris = intent.getParcelableArrayListExtra<Uri>("IMAGE_URIS")
 
-        recyclerView = findViewById(R.id.imagesRecyclerView)
-        setupRecyclerView()
+            titleTextView.text = documentName
 
-        if (documentId != null && imageUris != null) {
+            setupRecyclerView()
+
+            val imageUris = imageUriStrings.map { Uri.parse(it) }
             loadDocument(documentId, imageUris)
         } else {
-            // Обработка ошибки
+            showErrorAndFinish()
         }
     }
 
@@ -93,57 +87,31 @@ class DocumentInfoActivity : AppCompatActivity(), SecuritySettingsListener {
             startActivity(intent, options.toBundle())
         }
         recyclerView.adapter = imageAdapter
-
     }
 
     private fun loadDocument(documentId: String, imageUris: List<Uri>) {
-        val document = documentStorage.getDocumentById(documentId)
-        if (document != null) {
-            titleTextView.text = document.name
-            imageAdapter.submitList(imageUris)
-
-            recyclerView.viewTreeObserver.addOnPreDrawListener(object : ViewTreeObserver.OnPreDrawListener {
-                override fun onPreDraw(): Boolean {
-                    recyclerView.viewTreeObserver.removeOnPreDrawListener(this)
-                    for (i in 0 until recyclerView.childCount) {
-                        val view = recyclerView.getChildAt(i)
-                        ViewCompat.setTransitionName(view, "documentImage_${document.id}_$i")
-                    }
-                    startPostponedEnterTransition()
-                    return true
-                }
-            })
-        } else {
-            // Обработка ошибки
-        }
-    }
-
-    private fun displayDocument(document: Document) {
-        titleTextView.text = document.name
-        loadImages(document)
-    }
-
-    private fun loadImages(document: Document) {
-        val imageUris = document.fileNames.mapNotNull { fileName ->
-            secureStorage.getDecryptedImage(fileName)?.let { Uri.fromFile(it) }
-        }
         imageAdapter.submitList(imageUris)
-
-        // Set transition names for images
-        recyclerView.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
-            override fun onGlobalLayout() {
-                recyclerView.viewTreeObserver.removeOnGlobalLayoutListener(this)
+        recyclerView.viewTreeObserver.addOnPreDrawListener(object : ViewTreeObserver.OnPreDrawListener {
+            override fun onPreDraw(): Boolean {
+                recyclerView.viewTreeObserver.removeOnPreDrawListener(this)
                 for (i in 0 until recyclerView.childCount) {
                     val view = recyclerView.getChildAt(i)
-                    ViewCompat.setTransitionName(view, "documentImage_${document.id}_$i")
-                    Log.d("DocumentsFragment", "DocumentInfoActivity Added transition name for image documentImage_${document.id}_$i")
+                    ViewCompat.setTransitionName(view, "documentImage_${documentId}_$i")
                 }
+                startPostponedEnterTransition()
+                return true
             }
         })
     }
 
+    private fun displayDocument(document: Document) {
+        titleTextView.text = document.name
+        imageAdapter.submitList(document.imageUris)
+        startPostponedEnterTransition()
+    }
+
     private fun showErrorAndFinish() {
-        Toast.makeText(this, "error", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, "Error loading document", Toast.LENGTH_LONG).show()
         finish()
     }
 
@@ -161,7 +129,7 @@ class DocumentInfoActivity : AppCompatActivity(), SecuritySettingsListener {
             Intent(this, PinSetupActivity::class.java)
         }
         startActivity(intent)
-        finish()  // Закрываем DocumentInfoActivity, чтобы пользователь не мог вернуться к ней без аутентификации
+        finish()
     }
 
     override fun onDestroy() {
@@ -178,7 +146,7 @@ class DocumentInfoActivity : AppCompatActivity(), SecuritySettingsListener {
             addTransition(ChangeBounds())
             addTransition(ChangeTransform())
             addTransition(ChangeImageTransform())
-            duration = 300 // или другое подходящее значение
+            duration = 300
         }
         window.sharedElementEnterTransition = transition
         window.sharedElementReturnTransition = transition

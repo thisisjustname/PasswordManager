@@ -1,6 +1,5 @@
 package com.example.passwordmanager.documents
 
-import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,7 +9,6 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import com.example.passwordmanager.R
-import com.example.passwordmanager.SecureImageStorage
 
 class DocumentAdapter(
     private val documents: List<Document>,
@@ -49,10 +47,7 @@ class DocumentAdapter(
         holder.nameTextView.transitionName = "documentTitle_${document.id}"
 
         // Load thumbnails
-        val secureStorage = SecureImageStorage(holder.itemView.context)
-        val imageUris = document.fileNames.take(4).mapNotNull { fileName ->
-            secureStorage.getDecryptedImage(fileName)?.let { Uri.fromFile(it) }
-        }
+        val imageUris = document.imageUris.take(4)
 
         // Set visibility and layout for thumbnails based on count
         for (i in 0 until 4) {
