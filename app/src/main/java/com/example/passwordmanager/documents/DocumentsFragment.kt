@@ -46,9 +46,9 @@ class DocumentsFragment : Fragment() {
 
     private fun setupRecyclerView() {
         recyclerView.layoutManager = LinearLayoutManager(context)
-        adapter = DocumentAdapter(documents) { document, cardView, titleView, thumbnails ->
+        adapter = DocumentAdapter(documents, { document, cardView, titleView, thumbnails ->
             openDocumentInfo(document, cardView, titleView, thumbnails)
-        }
+        })
         recyclerView.adapter = adapter
     }
 
@@ -65,18 +65,37 @@ class DocumentsFragment : Fragment() {
     }
 
     private fun loadDocuments() {
+        // Show shimmer effect
+        adapter.showShimmer()
+
         viewLifecycleOwner.lifecycleScope.launch {
             val loadedDocuments = withContext(Dispatchers.IO) {
                 documentStorage.getAllDocuments().map { document ->
-                    val imageUris = document.fileNames.mapNotNull { fileName ->
-                        secureStorage.getDecryptedImage(fileName)?.let { Uri.fromFile(it) }
-                    }
-                    document.copy(imageUris = imageUris)
+                    document.copy(imageUris = emptyList()) // Initially, set empty image URIs
                 }
             }
             documents.clear()
             documents.addAll(loadedDocuments)
             adapter.notifyDataSetChanged()
+
+            // Load images in the background
+            loadedDocuments.forEach { document ->
+                launch {
+                    val imageUris = document.fileNames.mapNotNull { fileName ->
+                        withContext(Dispatchers.IO) {
+                            secureStorage.getDecryptedImage(fileName)?.let { Uri.fromFile(it) }
+                        }
+                    }
+                    val index = documents.indexOfFirst { it.id == document.id }
+                    if (index != -1) {
+                        documents[index] = document.copy(imageUris = imageUris)
+                        adapter.notifyItemChanged(index)
+                    }
+                }
+            }
+
+            // Hide shimmer effect after all documents are loaded
+            adapter.hideShimmer()
         }
     }
 

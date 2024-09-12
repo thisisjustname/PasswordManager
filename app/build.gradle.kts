@@ -49,10 +49,11 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
 
     implementation ("com.google.android.flexbox:flexbox:3.0.0")
-    implementation("io.coil-kt:coil:1.4.0")
+    implementation("io.coil-kt:coil:2.7.0")
     implementation ("androidx.security:security-crypto:1.1.0-alpha06")
     implementation ("androidx.paging:paging-runtime-ktx:3.1.1")
     implementation("com.github.bumptech.glide:glide:4.12.0")
+    implementation("com.facebook.shimmer:shimmer:0.5.0")
 
     implementation("androidx.biometric:biometric:1.1.0")
     implementation ("com.google.android.material:material:1.8.0")
@@ -61,5 +62,4 @@ dependencies {
     implementation ("androidx.cardview:cardview:1")
     implementation("com.google.code.gson:gson:2.8.9")
     implementation ("androidx.core:core-ktx:1.10.0")
-
 }

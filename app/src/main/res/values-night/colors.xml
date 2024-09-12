@@ -15,6 +15,7 @@
     <color name="md_theme_error">#FFB4AB</color>
     <color name="md_theme_onError">#690005</color>
     <color name="md_theme_errorContainer">#93000A</color>
+    <color name="shimmer_color">#DDDDDD</color>
     <color name="md_theme_onErrorContainer">#FFDAD6</color>
     <color name="md_theme_background">#13140D</color>
     <color name="md_theme_onBackground">#E4E3D7</color>

@@ -8,12 +8,23 @@ import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
+import coil.size.Scale
+import coil.size.ViewSizeResolver
 import com.example.passwordmanager.R
+import com.example.passwordmanager.RoundedCornersTransformation
+import com.facebook.shimmer.ShimmerFrameLayout
 
 class DocumentAdapter(
     private val documents: List<Document>,
     private val onItemClick: (Document, View, TextView, List<ImageView>) -> Unit
-) : RecyclerView.Adapter<DocumentAdapter.DocumentViewHolder>() {
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+
+    private var showShimmer = true
+
+    companion object {
+        private const val VIEW_TYPE_ITEM = 0
+        private const val VIEW_TYPE_SHIMMER = 1
+    }
 
     class DocumentViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val cardView: androidx.cardview.widget.CardView = itemView.findViewById(R.id.cardView)
@@ -33,23 +44,44 @@ class DocumentAdapter(
         )
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DocumentViewHolder {
-        val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.document_item, parent, false)
-        return DocumentViewHolder(view)
+    class ShimmerViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val shimmerLayout: ShimmerFrameLayout = itemView as ShimmerFrameLayout
     }
 
-    override fun onBindViewHolder(holder: DocumentViewHolder, position: Int) {
-        val document = documents[position]
-        holder.nameTextView.text = document.name
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        return when (viewType) {
+            VIEW_TYPE_ITEM -> {
+                val view = LayoutInflater.from(parent.context)
+                    .inflate(R.layout.document_item, parent, false)
+                DocumentViewHolder(view)
+            }
+            VIEW_TYPE_SHIMMER -> {
+                val view = LayoutInflater.from(parent.context)
+                    .inflate(R.layout.document_item_shimmer, parent, false)
+                ShimmerViewHolder(view)
+            }
+            else -> throw IllegalArgumentException("Invalid view type")
+        }
+    }
 
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        when (holder) {
+            is DocumentViewHolder -> {
+                val document = documents[position]
+                bindDocumentViewHolder(holder, document)
+            }
+            is ShimmerViewHolder -> {
+                holder.shimmerLayout.startShimmer()
+            }
+        }
+    }
+
+    private fun bindDocumentViewHolder(holder: DocumentViewHolder, document: Document) {
+        holder.nameTextView.text = document.name
         holder.cardView.transitionName = "documentCard_${document.id}"
         holder.nameTextView.transitionName = "documentTitle_${document.id}"
 
-        // Load thumbnails
         val imageUris = document.imageUris.take(4)
-
-        // Set visibility and layout for thumbnails based on count
         for (i in 0 until 4) {
             if (i < imageUris.size) {
                 holder.thumbnailContainers[i].visibility = View.VISIBLE
@@ -59,6 +91,8 @@ class DocumentAdapter(
                 holder.thumbnails[i].load(imageUris[i]) {
                     crossfade(true)
                     placeholder(R.drawable.shimmer_placeholder)
+                    scale(Scale.FIT)
+                    transformations(RoundedCornersTransformation(16f))
                 }
             } else {
                 holder.thumbnailContainers[i].visibility = View.GONE
@@ -66,8 +100,15 @@ class DocumentAdapter(
             }
         }
 
-        // Adjust layout for different image counts
-        when (imageUris.size) {
+        adjustLayoutForImageCount(holder, imageUris.size)
+
+        holder.itemView.setOnClickListener {
+            onItemClick(document, holder.cardView, holder.nameTextView, holder.thumbnails)
+        }
+    }
+
+    private fun adjustLayoutForImageCount(holder: DocumentViewHolder, imageCount: Int) {
+        when (imageCount) {
             1 -> {
                 holder.thumbnailContainers[0].layoutParams =
                     (holder.thumbnailContainers[0].layoutParams as ConstraintLayout.LayoutParams).apply {
@@ -94,11 +135,21 @@ class DocumentAdapter(
                 holder.thumbnailContainers[3].visibility = View.GONE
             }
         }
-
-        holder.itemView.setOnClickListener {
-            onItemClick(document, holder.cardView, holder.nameTextView, holder.thumbnails)
-        }
     }
 
-    override fun getItemCount() = documents.size
+    override fun getItemCount(): Int = if (showShimmer) 10 else documents.size
+
+    override fun getItemViewType(position: Int): Int {
+        return if (showShimmer) VIEW_TYPE_SHIMMER else VIEW_TYPE_ITEM
+    }
+
+    fun showShimmer() {
+        showShimmer = true
+        notifyDataSetChanged()
+    }
+
+    fun hideShimmer() {
+        showShimmer = false
+        notifyDataSetChanged()
+    }
 }
